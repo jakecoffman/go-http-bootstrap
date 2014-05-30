@@ -19,7 +19,7 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("static"))))
 
 	// example of how to use templates
-	http.HandleFunc("/foo", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		t, err := template.ParseFiles("templates/example.html")
 		if err != nil {
 			panic(err)
