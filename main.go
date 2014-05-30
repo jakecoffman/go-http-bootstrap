@@ -38,6 +38,7 @@ func main() {
 		w.Write([]byte("Hello!"))
 	}))
 
+	// anoter custom middleware filter, breaking from the typical handler interface
 	http.Handle("/bap", myFilter(func(w http.ResponseWriter, r *http.Request) string {
 		log.Printf("In bap handler")
 		return "Greetings!"
