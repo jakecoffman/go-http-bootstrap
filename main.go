@@ -38,6 +38,11 @@ func main() {
 		w.Write([]byte("Hello!"))
 	}))
 
+	http.Handle("/bap", myFilter(func(w http.ResponseWriter, r *http.Request) string {
+		log.Printf("In bap handler")
+		return "Greetings!"
+	}))
+
 	// log if listen and serve fails
 	log.Fatal(http.ListenAndServe("localhost:8080", nil))
 }
@@ -53,4 +58,17 @@ func (f filter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	f(w, r)
 
 	log.Printf("Finished request for %s", r.URL)
+}
+
+// example of custom middleware/filters via function literals and closures
+func myFilter(f func(http.ResponseWriter, *http.Request) string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Started request for %s", r.URL)
+
+		// you can create custom handlers that don't match the usual ResponseWriter/Request format
+		toWrite := f(w, r)
+		w.Write([]byte(toWrite))
+
+		log.Printf("Finished request for %s", r.URL)
+	}
 }
