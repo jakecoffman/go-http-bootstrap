@@ -48,45 +48,52 @@ func fprintf(w http.ResponseWriter, r *http.Request) {
 
 // now for a custom middleware/filter via implementing http.Handler. first we need a type
 // to attach a method to. this can be anything, but handy if it's a function.
-type filter func(r *http.Request) string
+type filter func(r *http.Request) (string, interface{})
 
 // this is the method that implements http.Handler, it will be called rather than the func
 func (f filter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// perform actions before calling the handler
 	log.Printf("Started request for %s", r.URL)
 
-	// call the function that got passed in. in this example it returns a string and we
-	// write it to the response. in this way we can factor out duplicate code from the
-	// handlers.
-	str := f(r)
-	w.Write([]byte(str))
+	// call the function that got passed in.
+	// we can factor out duplicate code from the handlers using this methodology.
+	name, data := f(r)
+	t, err := template.ParseFiles(name)
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, data)
 
 	// perform actions after calling the handler
 	log.Printf("Finished request for %s", r.URL)
 }
 
 // now wrap a function with the filter
-var withFilter http.Handler = filter(func(r *http.Request) string {
+var withFilter http.Handler = filter(func(r *http.Request) (string, interface{}) {
 	log.Println("In baz handler")
-	return "Hello!"
+	return "templates/example.html", Example{"withFilter", "works!"}
 })
 
 // here's a simpler custom middleware/filters via function literals and closures.
 // rather than jumping through the hoops of implementing an interface, we just define
 // a function that takes another function and returns a handlerfunc.
-func myFilter(f func(*http.Request) string) http.HandlerFunc {
+func myFilter(f func(*http.Request) (string, interface{})) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Started request for %s", r.URL)
 
-		toWrite := f(r)
-		w.Write([]byte(toWrite))
+		name, data := f(r)
+		t, err := template.ParseFiles(name)
+		if err != nil {
+			panic(err)
+		}
+		t.Execute(w, data)
 
 		log.Printf("Finished request for %s", r.URL)
 	}
 }
 
 // so this is actually the same example as the above, only simpler
-var simpler http.Handler = myFilter(func(r *http.Request) string {
+var simpler http.Handler = myFilter(func(r *http.Request) (string, interface{}) {
 	log.Printf("In bap handler")
-	return "Greetings!"
+	return "templates/example.html", Example{"simpler", "works!"}
 })
