@@ -8,14 +8,25 @@ import (
 
 func main() {
 	http.Handle("/static/", static)
-	http.HandleFunc("/", handle)
+	http.HandleFunc("/", filter(handle))
 
-	log.Fatal(http.ListenAndServe("localhost:5001", nil))
+	host := "localhost:5001"
+	log.Println("Serving on " + host)
+	log.Fatal(http.ListenAndServe(host, nil))
 }
 
 var static http.Handler = http.StripPrefix("/static", http.FileServer(http.Dir("static")))
 
-func handle(w http.ResponseWriter, r *http.Request) {
+// a place to put filters/middleware
+func filter(f func(http.ResponseWriter, *http.Request) int) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		status := f(w, r)
+		log.Println(r.RemoteAddr, r.URL, status)
+	}
+}
+
+// handle responses by rendering a template of the same name as the path
+func handle(w http.ResponseWriter, r *http.Request) int {
 	var name string
 
 	if r.URL.String() == "/" {
@@ -31,8 +42,9 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		log.Println(r.RemoteAddr, r.URL, 404)
-		return
+		return 404
 	}
 	t.Execute(w, nil)
 	log.Println(r.RemoteAddr, r.URL, 200)
+	return 200
 }
