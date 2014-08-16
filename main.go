@@ -34,7 +34,7 @@ func initDb(db *sql.DB) {
 	check(err)
 	defer rows.Close()
 	if !rows.Next() {
-		_, err = db.Exec("insert into users values(0, 'admin', 'admin')")
+		_, err = db.Exec("insert into users(name, password) values('admin', 'admin')")
 		check(err)
 	}
 }
