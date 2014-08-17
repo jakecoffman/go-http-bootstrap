@@ -3,27 +3,17 @@
 <div class="container-fluid">
 	<div class="row" style="background: #724849">
 		<div class="col-sm-12" style="min-height: 50%;">
-			<h1>Hello</h1>
-			<p>I have much to say.</p>
-			<p style="margin-top: 25%"><i class="fa fa-long-arrow-down" style="font-size: 7em;"></i>
-		</div>
-	</div>
-	<div class="row" style="color: #2C4645; min-height: 50%;">
-		<div class="col-sm-12">
-			<h1>Section 1</h1>
-			<p>The previous was section 0.</p>
-		</div>
-	</div>
-	<div class="row" style="background: #735B49; min-height: 50%;">
-		<div class="col-sm-12">
-			<h1>Are you ready?</h1>
-			<p>For some football</p>
-		</div>
-	</div>
-	<div class="row" style="color: #3D5D3B; min-height: 50%;">
-		<div class="col-sm-12">
-			<h1>Contact</h1>
-			<p>You can't, no form.</p>
+			{{if .user}}
+			<form action="/logout" method="POST">
+				<input type="submit" value="Logout {{.user}}" class="btn btn-primary pull-right"/>
+			</form>
+			{{else}}
+			<form action="/authorize" method="POST">
+				<input type="submit" value="Login with Google" class="btn btn-primary pull-right"/>
+			</form>
+			{{end}}
+			<br/>
+			<h1>Welcome</h1>
 		</div>
 	</div>
 </div>
